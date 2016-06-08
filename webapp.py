@@ -7,7 +7,8 @@ app = Flask(__name__)
 
 @app.route('/', methods = ['POST', 'GET'])
 def home():
-    return "home success " ,200
+    scriptPath = os.path.dirname(os.path.realpath(__file__))
+    return "home success " + scriptPath ,200
 
 if __name__ == '__main__':
 

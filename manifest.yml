@@ -1,7 +1,9 @@
 ---
 applications:
 - name: flask-csoh
-  memory: 1GB
+  memory: 400MB
   buildpack: git://github.com/ihuston/python-conda-buildpack.git
   timeout: 180
   command: .conda/bin/python webapp.py
+  services:
+    - mongo-service
