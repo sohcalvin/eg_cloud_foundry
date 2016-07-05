@@ -41,33 +41,42 @@ def envMongodbUsernamePassword():
         envAuthDb = envEval("MONGODB_AUTH_DB")
         return envUsername, envPassword, envAuthDb
 
-uri = envEval("MONGODB_URI")
-client = MongoClient(uri)
-db = client.cvr_db
-# db.fruit.insert({"apple" : "red"})
-# print(">>>>>>>>ssss>>", db.fruit.find())
+(envHost, envPort) = envMongodbHostPort()
+if(envHost is not None and envPort is not None) :
+            host = envHost
+            port = envPort
+client = MongoClient(host, port, maxPoolSize=200)
+(envUsername, envPassword, envAuthDb) = envMongodbUsernamePassword()
+db = client["cvr_db"]
+if(envUsername is not None and envPassword is not None, envAuthDb is not None) :
+        print(">>>>> Authenticating with dbname:", envAuthDb)
+        db = client[envAuthDb]
+        db.authenticate(envUsername, envPassword, source=envAuthDb)
 
-#
-# (envHost, envPort) = envMongodbHostPort()
-# if(envHost is not None and envPort is not None) :
-#             host = envHost
-#             port = envPort
-# client = MongoClient(host, port, maxPoolSize=200)
-#
-#
-#
-#
-# db = client["cvr_db"]
-# (envUsername, envPassword, envAuthDb) = envMongodbUsernamePassword()
-# if(envUsername is not None and envPassword is not None, envAuthDb is not None) :
-#         print(">>>>> Authenticating with dbname:", envAuthDb)
-#         db.authenticate(envUsername, envPassword, source=envAuthDb)
-#
-# db.add_user('newTestUser', roles=[{'role':'readWrite','db':'cvr_db'}])
+# uri = envEval("MONGODB_URI")
+# client = MongoClient(uri)
+# print(">>>>", envAuthDb,"<<<")
+
+# db = client[envAuthDb]
+# db.add_user(envUsername,envPassword,roles=[{ "role": "readWrite", "db": "cvr_db" }])
+
+# db = client.cvr_db
+db.xxx.insert({"apple":"red5"})
+db.xxx.insert({"lemon":"yellow6"})
+
+users = db.xxx.find()
+for u in users :
+    print(u,"<<<")
+
+
+
+
+
+
 
 # print(self.db.admin.find())
-db.cv.create_index([("raw_content", TEXT)])
-print(">>>>>>>xxxx")
+idone = db.cv.create_index([("raw_content", TEXT)])
+print(">>>>>>>xxxx", idone)
         # self.db.job.create_index([("title", TEXT), ("description", TEXT)])
         # self.db.rec_cache.create_index("createdAt", expireAfterSeconds=10*60)
         # self.fs = gridfs.GridFS(self.db)
