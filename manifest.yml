@@ -15,3 +15,8 @@ applications:
     MONGODB_PASSWORD: 'eval :json.loads(os.environ["VCAP_SERVICES"])["mongodb"][0]["credentials"]["password"]'
     MONGODB_AUTH_DB: 'eval :json.loads(os.environ["VCAP_SERVICES"])["mongodb"][0]["credentials"]["dbname"]'
     MONGODB_URI: 'eval :json.loads(os.environ["VCAP_SERVICES"])["mongodb"][0]["credentials"]["uri"]'
+  services:
+    - CVR_TEST
+- name: delme_worker
+  command: python hello.py
+  no-route: true

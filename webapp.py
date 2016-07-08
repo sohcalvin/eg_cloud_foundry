@@ -1,7 +1,8 @@
-from flask import Flask
+from flask import Flask, request
 import os
 import sys
 import re
+import io
 
 from pymongo import MongoClient, TEXT
 import json
@@ -23,7 +24,6 @@ def envEval(env_name) :
         return eval(nval,{})
     return val
 
-
 def envMongodbHostPort():
         envHost = envEval("MONGODB_HOST")
         envPort = envEval("MONGODB_PORT")
@@ -40,6 +40,8 @@ def envMongodbUsernamePassword():
         envPassword = envEval("MONGODB_PASSWORD")
         envAuthDb = envEval("MONGODB_AUTH_DB")
         return envUsername, envPassword, envAuthDb
+host="localhost"
+port=27017
 
 (envHost, envPort) = envMongodbHostPort()
 if(envHost is not None and envPort is not None) :
@@ -48,39 +50,47 @@ if(envHost is not None and envPort is not None) :
 client = MongoClient(host, port, maxPoolSize=200)
 (envUsername, envPassword, envAuthDb) = envMongodbUsernamePassword()
 db = client["cvr_db"]
-if(envUsername is not None and envPassword is not None, envAuthDb is not None) :
+if(envUsername is not None and envPassword is not None and envAuthDb is not None) :
         print(">>>>> Authenticating with dbname:", envAuthDb)
         db = client[envAuthDb]
         db.authenticate(envUsername, envPassword, source=envAuthDb)
 
-# uri = envEval("MONGODB_URI")
-# client = MongoClient(uri)
-# print(">>>>", envAuthDb,"<<<")
-
-# db = client[envAuthDb]
-# db.add_user(envUsername,envPassword,roles=[{ "role": "readWrite", "db": "cvr_db" }])
-
-# db = client.cvr_db
-db.xxx.insert({"apple":"red5"})
-db.xxx.insert({"lemon":"yellow6"})
-
-users = db.xxx.find()
-for u in users :
-    print(u,"<<<")
-
-
-
-
-
+# db.xxx.insert({"apple":"red5"})
+# db.xxx.insert({"lemon":"yellow6"})
+# users = db.xxx.find()
+# for u in users :
+#     print(u,"<<<")
 
 
 # print(self.db.admin.find())
-idone = db.cv.create_index([("raw_content", TEXT)])
-print(">>>>>>>xxxx", idone)
-        # self.db.job.create_index([("title", TEXT), ("description", TEXT)])
-        # self.db.rec_cache.create_index("createdAt", expireAfterSeconds=10*60)
-        # self.fs = gridfs.GridFS(self.db)
-        # self.bu =BatchQueueUtil(self.db)
+# idone = db.cv.create_index([("raw_content", TEXT)])
+
+# self.db.job.create_index([("title", TEXT), ("description", TEXT)])
+# self.db.rec_cache.create_index("createdAt", expireAfterSeconds=10*60)
+# self.fs = gridfs.GridFS(self.db)
+# self.bu =BatchQueueUtil(self.db)
+
+@app.route('/mongo', methods = ['POST', 'GET'])
+def mongo():
+    import sys
+
+    cmd1 = request.args.get("cmd")
+    cmd2 = request.form.get("cmd")
+    cmd3 = request.data
+
+    if(cmd3) :
+        cmd =cmd3
+    elif(cmd2) :
+        cmd =cmd2
+    else :
+        cmd =cmd1
+    cmd = cmd.decode("ascii")
+    # print("Evaluating\n{0}\n".format(cmd))
+    buffer = io.StringIO()
+    sys.stdout = buffer
+    exec(cmd)
+    return "{0}".format(buffer.getvalue()), 200
+
 
 @app.route('/', methods = ['POST', 'GET'])
 def home():
